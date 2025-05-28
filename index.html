@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<body lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link type="image/svg+xml" href="/vite.svg" rel="icon" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Vite App</title>
+        <link href="./css/reset.css" rel="stylesheet" />
+        <link href="./css/style.css" rel="stylesheet" />
+    </head>
+    <body>
+        <main>
+            <h1>Notes</h1>
+            <div class="search-wrapper">
+                <input class="search-input" id="search-input" name="search-input" type="text" placeholder="Search" />
+                <img
+                    class="search-icon"
+                    src="./assets/search_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                    alt="Search Icon" />
+            </div>
+
+            <div class="notes-wrapper">
+                <ul class="notes-list" id="notes-list">
+                    <li>
+                        <h2>Chalex</h2>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+                        <div class="dates">
+                            <p id="modal-date">Created on: 10/10/2022</p>
+                            <p id="modal-last-updated">Last Updated: 10/10/2022</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <button class="add-note-button" id="add-note-button">+</button>
+        </main>
+
+        <dialog class="note-modal hidden" id="note-modal">
+            <h2 class="modal-title" id="modal-title" contenteditable="true">New Note</h2>
+            <p class="modal-body" id="modal-body" contenteditable="true">
+                Lorem ipsad dolor sit amet consectetur adipisicing elit.
+            </p>
+
+            <div class="modal-footer">
+                <button class="close-modal" id="close-modal">Close</button>
+            </div>
+        </dialog>
+
+        <script src="./js/main.js"></script>
+    </body>
+</body>
