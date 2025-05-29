@@ -35,6 +35,7 @@ function resetModal() {
     modalTitle.textContent = "";
     modalBody.textContent = "";
     currentNoteElement = null;
+    searchInput.value = "";
     originalNoteTitle = "";
     originalNoteBody = "";
     deleteNoteButton.style.display = "none";
