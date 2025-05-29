@@ -11,6 +11,10 @@ const searchInput = document.getElementById("search-input");
 let currentNoteElement = null;
 let originalNoteTitle = "";
 let originalNoteBody = "";
+let notes = []; // Array to hold all notes
+
+// Local Storage Keys
+const NOTES_STORAGE_KEY = "notes-app-notes";
 
 // Modal Functions
 function openModal() {
@@ -48,37 +52,85 @@ function handleModalClick(event) {
 }
 
 // Note Functions
-function createNoteElement(title, body) {
-    const note = document.createElement("li");
-    const createdDate = new Date().toLocaleString("en-US", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
 
-    note.innerHTML = `
-        <h2 class="note-title">${title}</h2>
-        <p class="note-body">${body}</p>
-        <div class="dates">
-            <p class="note-date">Created on: ${createdDate}</p>
-            <p class="note-updated-date"></p>
-        </div>
-    `;
-    return note;
+/**
+ * Creates a new note object with title, body, and timestamp.
+ * @param {string} title - The title of the note.
+ * @param {string} body - The body of the note.
+ * @returns {object} The new note object.
+ */
+function createNoteObject(title, body) {
+    const now = new Date().toISOString();
+    return {
+        id: Date.now().toString(), // Unique ID for the note
+        title,
+        body,
+        createdAt: now,
+        updatedAt: now,
+    };
 }
 
-function updateDate(noteElement) {
-    const updatedDateElement = noteElement.querySelector(".note-updated-date");
-    const updatedDate = new Date().toLocaleString("en-US", {
+/**
+ * Creates a DOM element for a note.
+ * @param {object} note - The note object.
+ * @returns {HTMLElement} The created list item element.
+ */
+function createNoteElement(note) {
+    const noteElement = document.createElement("li");
+    noteElement.dataset.id = note.id;
+
+    const createdDateFormatted = new Date(note.createdAt).toLocaleString("en-US", {
         day: "2-digit",
         month: "short",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
     });
-    updatedDateElement.textContent = `Last updated: ${updatedDate}`;
+
+    let updatedDateFormatted = "";
+    if (note.updatedAt && note.updatedAt !== note.createdAt) {
+        updatedDateFormatted = new Date(note.updatedAt).toLocaleString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    }
+
+    noteElement.innerHTML = `
+        <h2 class="note-title">${note.title}</h2>
+        <p class="note-body">${note.body}</p>
+        <div class="dates">
+            <p class="note-date">Created on: ${createdDateFormatted}</p>
+            <p class="note-updated-date">${updatedDateFormatted ? `Last updated: ${updatedDateFormatted}` : ""}</p>
+        </div>
+    `;
+    return noteElement;
+}
+
+function renderNotes() {
+    notesList.innerHTML = ""; // Clear existing notes
+
+    // Sort notes by updated date in descending order
+    const sortedNotes = [...notes].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+    sortedNotes.forEach((note) => {
+        const noteElement = createNoteElement(note);
+        notesList.appendChild(noteElement);
+    });
+}
+
+function saveNotes() {
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+}
+
+function loadNotes() {
+    const storedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
+    if (storedNotes) {
+        notes = JSON.parse(storedNotes);
+        renderNotes();
+    }
 }
 
 function createNewNote() {
@@ -87,35 +139,47 @@ function createNewNote() {
 
     if (!title && !body) return;
 
-    const noteElement = createNoteElement(title, body);
-    notesList.appendChild(noteElement);
+    const newNote = createNoteObject(title, body);
+    notes.push(newNote);
+    saveNotes();
+    renderNotes(); // Re-render to show new note and maintain sort order
 }
 
 function updateExistingNote() {
     const title = modalTitle.textContent.trim();
     const body = modalBody.textContent.trim();
 
-    if (!title || !body) {
-        currentNoteElement.remove();
-        return;
-    }
+    if (!currentNoteElement) return;
 
-    const titleChanged = title !== originalNoteTitle;
-    const bodyChanged = body !== originalNoteBody;
+    const noteId = currentNoteElement.dataset.id;
+    const noteIndex = notes.findIndex((note) => note.id === noteId);
 
-    if (titleChanged || bodyChanged) {
-        currentNoteElement.querySelector(".note-title").textContent = title;
-        currentNoteElement.querySelector(".note-body").textContent = body;
-        updateDate(currentNoteElement);
+    if (noteIndex === -1) return;
+
+    // If both title and body are empty, delete the note
+    if (!title && !body) {
+        notes.splice(noteIndex, 1);
+    } else {
+        const note = notes[noteIndex];
+        const titleChanged = title !== note.title;
+        const bodyChanged = body !== note.body;
+
+        if (titleChanged || bodyChanged) {
+            note.title = title;
+            note.body = body;
+            note.updatedAt = new Date().toISOString(); // Update the timestamp
+        }
     }
+    saveNotes();
+    renderNotes(); // Re-render to update the note and maintain sort order
 }
 
 function handleModalClose() {
     if (!currentNoteElement) {
         createNewNote();
+    } else {
+        updateExistingNote();
     }
-
-    updateExistingNote();
     resetModal();
 }
 
@@ -124,24 +188,29 @@ function handleNoteClick(event) {
     const noteElement = event.target.closest("li");
     if (!noteElement) return;
 
-    currentNoteElement = noteElement;
-    originalNoteTitle = noteElement.querySelector(".note-title").textContent;
-    originalNoteBody = noteElement.querySelector(".note-body").textContent;
+    const noteId = noteElement.dataset.id;
+    const note = notes.find((n) => n.id === noteId);
 
-    modalTitle.textContent = originalNoteTitle;
-    modalBody.textContent = originalNoteBody;
+    if (!note) return;
+
+    currentNoteElement = noteElement; // Set the current note element for updates
+    originalNoteTitle = note.title;
+    originalNoteBody = note.body;
+
+    modalTitle.textContent = note.title;
+    modalBody.textContent = note.body;
     openModal();
 }
 
 function handleSearchInput() {
     const searchTerm = searchInput.value.toLowerCase();
-    const notes = notesList.querySelectorAll("li");
+    const noteElements = notesList.querySelectorAll("li");
 
-    notes.forEach((note) => {
-        const title = note.querySelector(".note-title").textContent.toLowerCase();
-        const body = note.querySelector(".note-body").textContent.toLowerCase();
+    noteElements.forEach((noteElement) => {
+        const title = noteElement.querySelector(".note-title").textContent.toLowerCase();
+        const body = noteElement.querySelector(".note-body").textContent.toLowerCase();
         const shouldShow = title.includes(searchTerm) || body.includes(searchTerm);
-        note.style.display = shouldShow ? "" : "none";
+        noteElement.style.display = shouldShow ? "" : "none";
     });
 }
 
@@ -152,7 +221,6 @@ function handleTitleKeydown(event) {
     }
 }
 
-// Event Listeners
 function setupEventListeners() {
     addNoteButton.addEventListener("click", () => {
         resetModal();
@@ -167,5 +235,5 @@ function setupEventListeners() {
     searchInput.addEventListener("input", handleSearchInput);
 }
 
-// Initialize
 setupEventListeners();
+loadNotes();
