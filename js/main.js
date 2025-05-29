@@ -2,6 +2,7 @@
 const noteModal = document.getElementById("note-modal");
 const closeModalButton = document.getElementById("close-modal");
 const addNoteButton = document.getElementById("add-note-button");
+const deleteNoteButton = document.getElementById("delete-note");
 const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
 const notesList = document.getElementById("notes-list");
@@ -36,6 +37,7 @@ function resetModal() {
     currentNoteElement = null;
     originalNoteTitle = "";
     originalNoteBody = "";
+    deleteNoteButton.style.display = "none";
 }
 
 function handleModalClick(event) {
@@ -199,7 +201,21 @@ function handleNoteClick(event) {
 
     modalTitle.textContent = note.title;
     modalBody.textContent = note.body;
+
+    deleteNoteButton.style.display = "block";
+    deleteNoteButton.addEventListener("click", () => deleteNote(noteId));
+
     openModal();
+}
+
+function deleteNote(noteId) {
+    const noteIndex = notes.findIndex((note) => note.id === noteId);
+    if (noteIndex !== -1) {
+        notes.splice(noteIndex, 1);
+        saveNotes();
+        renderNotes();
+    }
+    closeModal();
 }
 
 function handleSearchInput() {

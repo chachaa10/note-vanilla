@@ -204,15 +204,6 @@ dialog {
     border-radius: 10px;
 }
 
-.close-modal {
-    padding: 0.5rem 1.5rem;
-    border: none;
-    background-color: rgba(255, 0, 0, 0.8);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
-
 .modal-body {
     flex-grow: 1;
     padding: 15px 20px;
@@ -247,4 +238,34 @@ body.no-scroll {
 .last-modified {
     align-self: flex-end;
     color: white;
+}
+
+.delete-button.hidden {
+    display: none;
+}
+
+.delete-button,
+.close-modal {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal {
+    background-color: blue;
+
+    &:hover {
+        background-color: rgba(0, 0, 255, 0.8);
+    }
+}
+
+.delete-button {
+    background-color: red;
+
+    &:hover {
+        background-color: rgba(255, 0, 0, 0.8);
+    }
 }
