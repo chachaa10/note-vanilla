@@ -8,6 +8,38 @@ const modalBody = document.getElementById("modal-body");
 const notesList = document.getElementById("notes-list");
 const searchInput = document.getElementById("search-input");
 
+// mock data with emojis
+const mockNotes = [
+    {
+        id: "1",
+        title: "Welcome to Note App",
+        body: "made with ❤️",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: "2",
+        title: "Add Notes",
+        body: "📝",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: "3",
+        title: "Edit Notes",
+        body: "✏️",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: "4",
+        title: "Delete Notes",
+        body: "🗑️",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+];
+
 // State Management
 let currentNoteElement = null;
 let originalNoteTitle = "";
@@ -65,7 +97,7 @@ function handleModalClick(event) {
 function createNoteObject(title, body) {
     const now = new Date().toISOString();
     return {
-        id: Date.now().toString(), // Unique ID for the note
+        id: crypto.randomUUID(),
         title,
         body,
         createdAt: now,
@@ -105,7 +137,7 @@ function createNoteElement(note) {
         <h2 class="note-title">${note.title}</h2>
         <p class="note-body">${note.body}</p>
         <div class="dates">
-            <p class="note-date">Created on: ${createdDateFormatted}</p>
+            <p class="note-date">${createdDateFormatted ? `Created on: ${createdDateFormatted}` : ""}</p>
             <p class="note-updated-date">${updatedDateFormatted ? `Last updated: ${updatedDateFormatted}` : ""}</p>
         </div>
     `;
@@ -130,10 +162,15 @@ function saveNotes() {
 
 function loadNotes() {
     const storedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
+
     if (storedNotes) {
         notes = JSON.parse(storedNotes);
-        renderNotes();
+    } else {
+        notes = [...mockNotes];
+        saveNotes(); // Save mock data to localStorage so it doesn’t load again
     }
+
+    renderNotes();
 }
 
 function createNewNote() {
