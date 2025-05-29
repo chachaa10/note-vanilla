@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
+:root {
+    --secondary-bg-value: 31, 41, 55; /* Just the R, G, B values */
+    --secondary-bg: rgb(var(--secondary-bg-value));
+    --button-bg: 29, 78, 216;
+}
+
 .roboto-regular {
     font-style: normal;
     font-weight: 400;
@@ -8,11 +14,11 @@
     font-variation-settings: "wdth" 100;
 }
 
-* {
-    /* outline: 1px solid red; */
-}
-
 body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #111827;
+    color: white;
     font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen, Ubuntu, Cantarell,
         "Open Sans", "Helvetica Neue", sans-serif;
 }
@@ -22,6 +28,8 @@ main {
     position: relative;
     flex-direction: column;
     width: min(70ch, 100%);
+    min-height: 100vh;
+    min-height: 100dvh;
     margin-inline: auto;
     padding: 0.75rem;
     gap: 0.5rem;
@@ -34,114 +42,137 @@ main {
 
     & input.search-input {
         width: 100%;
-        height: 40px;
-        padding-inline: 2rem;
+        padding-left: 2.5rem;
         padding-block: 0.5rem;
-        border: 1px solid #ccc;
+        border: none;
         border-radius: 5px;
+        background-color: var(--secondary-bg);
+        color: white;
+
+        &:focus {
+            outline: 2px solid rgb(43, 127, 255);
+        }
     }
 
     & img.search-icon {
         position: absolute;
         top: 50%;
         left: 10px;
-        size: 20px;
         transform: translateY(-50%);
+        filter: invert(0.5);
         pointer-events: none;
     }
 }
 
 .notes-list {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     padding: 0;
     gap: 0.75rem;
     list-style: none;
-
-    @media screen and (min-width: 550px) {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media screen and (min-width: 900px) {
-        grid-template-columns: repeat(3, 1fr);
-    }
 
     & li {
         display: flex;
         flex-direction: column;
         padding: 1rem;
         gap: 0.5rem;
-        border: 1px solid #ccc;
+        border: 1px solid rgba(255, 255, 255, 0.09);
         border-radius: 5px;
+        background-color: var(--secondary-bg);
+
+        cursor: pointer;
+
+        & .note-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        & .note-body {
+            font-size: 1rem;
+        }
+
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(var(--secondary-bg-value), 0.6);
+        }
+
+        & .dates {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
     }
 }
 
-.add-note-button {
-    --_size: 50px;
+.button-position {
     display: flex;
-    position: sticky;
+    position: fixed;
+    right: 15px;
     bottom: 15px;
-    left: 78%;
+    justify-content: flex-end;
+}
 
+.add-note-button {
+    --_size: 60px;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: var(--_size);
     height: var(--_size);
     border: none;
     border-radius: 50%;
-    background-color: rgb(218, 218, 218);
-    font-size: 2rem;
+    background-color: rgb(var(--button-bg));
+    color: white;
+    font-size: 3rem;
     cursor: pointer;
 
-    @media (min-width: 600px) {
-        .add-note-button {
-            right: calc(50% - min(35ch, 50%)); /* Align to right edge of main */
-            transform: none;
-        }
+    &:hover {
+        background-color: rgba(var(--button-bg), 0.8);
     }
 }
 
 dialog {
     display: flex;
     flex-direction: column;
-    width: min(70ch, 100%);
+    width: min(60ch, 100%);
     min-height: 12.5rem;
     margin: auto;
-    padding: 0;
+    padding: 1rem;
     overflow: hidden;
     border: none;
     border-radius: 8px;
+    background-color: var(--secondary-bg);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     opacity: 0;
+    scrollbar-color: #888 #f1f1f1; /* thumb-color track-color */
+    scrollbar-width: thin; /* Make the scrollbar thin */
     transition: all 0.7s allow-discrete;
-}
 
-dialog.hidden {
-    display: none;
-}
-/* Open state of the dialog  */
-dialog:open {
-    opacity: 1;
-}
+    &.hidden {
+        display: none;
+    }
 
-/* Closed state of the dialog   */
-dialog {
-    opacity: 0;
-    transition: all 0.7s allow-discrete;
+    /* Open state of the dialog  */
+    &:open {
+        opacity: 1;
+    }
+
+    &::backdrop {
+        background-color: rgb(0 0 0 / 0%);
+        transition: all 0.7s allow-discrete;
+    }
+
+    &:open::backdrop {
+        background-color: rgb(0 0 0 / 25%);
+    }
 }
 
 @starting-style {
     dialog:open {
         opacity: 0;
     }
-}
-
-dialog::backdrop {
-    background-color: rgb(0 0 0 / 0%);
-    transition: all 0.7s allow-discrete;
-}
-
-dialog:open::backdrop {
-    background-color: rgb(0 0 0 / 25%);
 }
 
 @starting-style {
@@ -151,12 +182,15 @@ dialog:open::backdrop {
 }
 
 .modal-title {
-    min-height: 50px;
+    margin-bottom: 1rem;
     padding: 0.5rem 1rem;
-    overflow: hidden;
-    border-bottom: 1px solid #eee;
-    font-weight: bold;
-    font-size: 1.5rem;
+}
+
+.modal-title,
+.modal-body {
+    --_bg-color: #374151;
+    background-color: var(--_bg-color);
+    color: white;
 }
 
 .modal-title:focus,
@@ -164,10 +198,31 @@ dialog:open::backdrop {
     outline: none;
 }
 
+.modal-title,
+.modal-body,
+.close-modal {
+    border-radius: 10px;
+}
+
+.close-modal {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .modal-body {
     flex-grow: 1;
     padding: 15px 20px;
     overflow-y: auto;
+}
+/* Works on Firefox */
+* {
+    scrollbar-color: var(--secondary-bg) rgba(128, 128, 128, 0);
+    scrollbar-gutter: auto;
+    scrollbar-width: thin;
 }
 
 .modal-footer {
@@ -179,19 +234,17 @@ dialog:open::backdrop {
     left: 0;
     flex-shrink: 0;
     justify-content: flex-end;
+    margin-top: 0.5rem;
     padding: 10px 20px;
     gap: 10px;
-    border-top: 1px solid #eee;
-    background-color: hsl(0, 0%, 98%);
-}
-
-.dates {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    font-size: 12px;
+    background-color: var(--secondary-bg);
 }
 
 body.no-scroll {
     overflow: hidden;
+}
+
+.last-modified {
+    align-self: flex-end;
+    color: white;
 }
